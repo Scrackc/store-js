@@ -2,10 +2,10 @@ import { BadRequestException, HttpException, Injectable, InternalServerErrorExce
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateSaleDto } from './dto/create-sale.dto';
-import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Sale } from './entities/sale.entity';
 import { ProductService } from '../product/product.service';
 import { SaleDetailService } from '../sale-detail/sale-detail.service';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class SaleService {
@@ -18,7 +18,7 @@ export class SaleService {
     private readonly saleDetailService: SaleDetailService
   ){}
 
-  async create(createSaleDto: CreateSaleDto) {
+  async create(createSaleDto: CreateSaleDto, user: User) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -40,7 +40,8 @@ export class SaleService {
       const totalForStore = totals.reduce((acc, cur) => acc += cur.totalStore, 0)
       const newSale = this.saleRepository.create({
         totalSale,
-        totalForStore
+        totalForStore,
+        user
       })
       
       await queryRunner.manager.save(products);

@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { Expiration } from '../../expiration/entities/expiration.entity';
 import { SaleDetail } from '../../sale-detail/entities/sale-detail.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity({name: 'products'})
 export class Product {
@@ -24,7 +25,9 @@ export class Product {
     @Column()
     minStock: number;
 
-    @Column()
+    @Column({
+        type: 'float'
+    })
     priceSale: number;
 
     @Column({
@@ -42,6 +45,22 @@ export class Product {
     updateAt: Date;
 
     // * Relations 
+
+    @ManyToOne(
+        () => User,
+        (user) => user.productsCreated,
+        {onDelete: "SET NULL"}
+    )
+    createdBy: User;
+    
+    @ManyToOne(
+        () => User,
+        (user) => user.productsUpdated,
+        { onDelete: "SET NULL" }
+    )
+    lastUpdateFor: User;
+
+
     @OneToMany(
         () => Expiration, 
         (expiration) => expiration.product,

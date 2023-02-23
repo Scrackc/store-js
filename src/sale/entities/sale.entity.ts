@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, OneToMany, ManyToOne } from 'typeorm';
 import { SaleDetail } from '../../sale-detail/entities/sale-detail.entity';
+import { User } from '../../users/entities/user.entity';
 @Entity({name:'sale'})
 export class Sale {
 
@@ -26,4 +27,11 @@ export class Sale {
         {cascade: ['remove']}
     )
     detailSale: SaleDetail[];
+
+    @ManyToOne(
+        () => User,
+        (user) => user.sales,
+        {onDelete: 'CASCADE'}
+    )
+    user:User;
 }

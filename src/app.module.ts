@@ -6,6 +6,8 @@ import { SaleModule } from './sale/sale.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common/common.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { CommonModule } from './common/common.module';
     ProductModule,
     ExpirationModule, 
     SaleDetailModule, 
-    SaleModule, CommonModule
+    SaleModule, CommonModule, UsersModule, AuthModule
   ],
   controllers: [],
   providers: [],

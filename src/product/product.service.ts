@@ -7,6 +7,7 @@ import { Product } from './entities/product.entity';
 import { ExpirationService } from '../expiration/expiration.service';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { AddStockDto } from './dto/add-stock.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProductService {
@@ -18,7 +19,7 @@ export class ProductService {
     private readonly dataSource: DataSource
   ){}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
     
     const {expirations, ...productToCreate} = createProductDto;
     
@@ -37,6 +38,8 @@ export class ProductService {
         await queryRunner.manager.save(exp);
         newProduct.productExpirations = exp;
       }
+      newProduct.createdBy = user;
+      newProduct.lastUpdateFor = user;
       await queryRunner.manager.save(newProduct);
       await queryRunner.commitTransaction();
 
@@ -72,17 +75,18 @@ export class ProductService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
     const product = await this.productRepository.preload({
       code: id,
-      ...updateProductDto
+      ...updateProductDto,
+      lastUpdateFor: user
     })
     if(!product) throw new NotFoundException("Producto no existene")
 
     return await this.productRepository.save(product)
   }
 
-  async addStock(id: string, addStock: AddStockDto){
+  async addStock(id: string, addStock: AddStockDto, user: User){
     const {stock, expirations} = addStock;
     const product = await this.productRepository.findOneBy({code: id});
     if (!product) {
@@ -99,6 +103,7 @@ export class ProductService {
 
     try {
       product.stock = product.stock + stock;
+      product.lastUpdateFor = user;
       if (expirations) {
         const exp = expirations.map(expiration => this.expirationService.create(expiration));
         await queryRunner.manager.save(exp);
